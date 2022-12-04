@@ -58,7 +58,6 @@ async function deleteUser(req, res) {
 async function recoverPassword(req, res) {
   const email = req.body.email
   const result = await passwordTokenController.createToken(email)
-  console.log(result)
 
   if (result.status) {
     res.status(200)
@@ -69,11 +68,34 @@ async function recoverPassword(req, res) {
   }
 }
 
+async function changePassword(req, res) {
+  const token = req.body.token
+  const password = req.body.password
+
+  const isValidToken = await passwordTokenController.validateToken(token)
+  console.log(isValidToken)
+
+  if (isValidToken) {
+    userModel.changePassword(
+      password,
+      isValidToken.token.user_id,
+      isValidToken.token.token
+    )
+
+    res.status(200)
+    res.send('senha alterada')
+  } else {
+    res.status(406)
+    res.send('token inválido')
+  }
+}
+
 module.exports = {
   createUser,
   findAllUsers,
   findUserById,
   editUser,
   deleteUser,
-  recoverPassword
+  recoverPassword,
+  changePassword
 }

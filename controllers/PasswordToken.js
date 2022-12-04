@@ -8,7 +8,6 @@ async function createToken(email) {
 
     if (user !== undefined) {
       const token = uuid()
-      console.log(user)
 
       await knex
         .insert({ user_id: user.id, used: 0, token })
@@ -29,6 +28,33 @@ async function createToken(email) {
   }
 }
 
+async function validateToken(token) {
+  try {
+    const result = await knex.select().where({ token }).table('passwordTokens')
+
+    if (result.length > 0) {
+      const tokenFromDB = result[0]
+
+      if (tokenFromDB.used) {
+        return { status: false }
+      } else {
+        return { status: true, token: tokenFromDB }
+      }
+    } else {
+      return { status: false }
+    }
+  } catch (err) {
+    console.log(err)
+    return { status: false }
+  }
+}
+
+async function setUsedToken(token) {
+  await knex.update({ used: 1 }).where({ token }).table('passwordTokens')
+}
+
 module.exports = {
-  createToken
+  createToken,
+  validateToken,
+  setUsedToken
 }

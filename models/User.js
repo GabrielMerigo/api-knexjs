@@ -1,5 +1,6 @@
 const knex = require('../database/connection')
 const bcrypt = require('bcrypt')
+const passwordTokenController = require('../controllers/PasswordToken')
 
 async function create({ name, password, email }) {
   try {
@@ -123,6 +124,12 @@ async function deleteById(id) {
   }
 }
 
+async function changePassword(newPassword, id, token) {
+  const hashPassword = await bcrypt.hash(newPassword, 10)
+  await knex.update({ password: hashPassword }).where({ id }).table('users')
+  passwordTokenController.setUsedToken(token)
+}
+
 module.exports = {
   create,
   findEmail,
@@ -130,5 +137,6 @@ module.exports = {
   findById,
   update,
   deleteById,
-  findByEmail
+  findByEmail,
+  changePassword
 }
