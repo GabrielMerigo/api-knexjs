@@ -17,7 +17,7 @@ async function createUser(req, res) {
   }
 
   await userModel.create(req.body);
-  return res.status(200).json({ status: 200 });
+  return res.status(200).send();
 }
 
 async function findAllUsers(req, res) {
